@@ -117,30 +117,9 @@ RUN mkdir -p /workspace/A1
 COPY init_or_check_nodes.sh /workspace/A1/init_or_check_nodes.sh
 RUN chmod +x /workspace/A1/init_or_check_nodes.sh
 
-# Hugging Face 모델 다운로드 스크립트 복사
-COPY Hugging_down_a1.sh /workspace/A1/Hugging_down_a1.sh
-RUN chmod +x /workspace/A1/Hugging_down_a1.sh
-
-# Framepack_down.sh 스크립트 복사 및 실행 권한 설정
-COPY Framepack_down.sh /workspace/A1/Framepack_down.sh
-RUN chmod +x /workspace/A1/Framepack_down.sh
-
 # Wan2.1_Vace_a1.sh 스크립트 복사 및 실행 권한 설정
 COPY Wan2.1_Vace_a1.sh /workspace/A1/Wan2.1_Vace_a1.sh
 RUN chmod +x /workspace/A1/Wan2.1_Vace_a1.sh
-
-# FusionX_14B_a1.sh 스크립트 복사 및 실행 권한 설정
-COPY FusionX_14B_a1.sh /workspace/A1/FusionX_14B_a1.sh
-RUN chmod +x /workspace/A1/FusionX_14B_a1.sh
-
-# Last_first_frame_a1.sh 스크립트 복사 및 실행 권한 설정
-COPY Last_first_frame_a1.sh /workspace/A1/Last_first_frame_a1.sh
-RUN chmod +x /workspace/A1/Last_first_frame_a1.sh
-
-# 퓨전X_A1_워크플로우.json 파일 복사 및 권한 설정
-COPY 퓨전X_A1_워크플로우.json /workspace/A1/퓨전X_A1_워크플로우.json
-RUN chmod +x /workspace/A1/퓨전X_A1_워크플로우.json
-
 
 
 
