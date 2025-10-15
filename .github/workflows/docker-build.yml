@@ -35,4 +35,4 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: a01demort/secure_test_comfyui-wan2.1_vace:v1.0.1
+          tags: a01demort/secure_test_comfyui-wan2.1_vace:v1.0.2
