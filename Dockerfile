@@ -77,7 +77,7 @@ RUN echo '📁 커스텀 노드 및 의존성 설치 시작' && \
     git clone https://github.com/ssitu/ComfyUI_UltimateSDUpscale.git || echo '⚠️ Upscale 실패' && \
     git clone https://github.com/risunobushi/comfyUI_FrequencySeparation_RGB-HSV.git || echo '⚠️ Frequency 실패' && \
     git clone https://github.com/silveroxides/ComfyUI_bnb_nf4_fp4_Loaders.git || echo '⚠️ NF4 노드 실패' && \
-    git clone https://github.com/kijai/ComfyUI-FramePackWrapper.git || echo '⚠️ FramePackWrapper 실패' && \  # ← 원본
+    git clone https://github.com/kijai/ComfyUI-FramePackWrapper.git || echo '⚠️ FramePackWrapper 실패' && \
     git clone https://github.com/pollockjj/ComfyUI-MultiGPU.git || echo '⚠️ MultiGPU 실패' && \
     git clone https://github.com/Fannovel16/comfyui_controlnet_aux.git || echo '⚠️ controlnet_aux 실패' && \
     git clone https://github.com/chflame163/ComfyUI_LayerStyle.git || echo '⚠️ ComfyUI_LayerStyle 설치 실패' && \
