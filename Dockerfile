@@ -30,8 +30,8 @@ RUN wget https://www.python.org/ftp/python/3.10.6/Python-3.10.6.tgz && \
 WORKDIR /workspace
 RUN mkdir -p /workspace && chmod -R 777 /workspace && \
     chown -R root:root /workspace
-RUN git clone https://github.com/comfyanonymous/ComfyUI.git /workspace/ComfyUI
-WORKDIR /workspace/ComfyUI
+RUN git clone https://github.com/comfyanonymous/ComfyUI.git /opt/ComfyUI
+WORKDIR /opt/ComfyUI
 
 # 의존성 설치
 RUN pip install -r requirements.txt && \
@@ -59,8 +59,8 @@ c.NotebookApp.terminado_settings = {'shell_command': ['/bin/bash']}" \
 
 # 커스텀 노드 및 의존성 설치 통합
 RUN echo '📁 커스텀 노드 및 의존성 설치 시작' && \
-    mkdir -p /workspace/ComfyUI/custom_nodes && \
-    cd /workspace/ComfyUI/custom_nodes && \
+    mkdir -p /opt/ComfyUI/custom_nodes && \
+    cd /opt/ComfyUI/custom_nodes && \
     git clone https://github.com/ltdrdata/ComfyUI-Manager.git || echo '⚠️ Manager 실패' && \
     git clone https://github.com/pythongosssss/ComfyUI-Custom-Scripts.git || echo '⚠️ Scripts 실패' && \
     git clone https://github.com/rgthree/rgthree-comfy.git || echo '⚠️ rgthree 실패' && \
@@ -89,12 +89,12 @@ RUN echo '📁 커스텀 노드 및 의존성 설치 시작' && \
 
     \
     echo '📦 segment-anything 설치' && \
-    git clone https://github.com/facebookresearch/segment-anything.git /workspace/segment-anything || echo '⚠️ segment-anything 실패' && \
-    pip install -e /workspace/segment-anything || echo '⚠️ segment-anything pip 설치 실패' && \
+    git clone https://github.com/facebookresearch/segment-anything.git /opt/segment-anything || echo '⚠️ segment-anything 실패' && \
+    pip install -e /opt/segment-anything || echo '⚠️ segment-anything pip 설치 실패' && \
     \
     echo '📦 ReActor ONNX 모델 설치' && \
-    mkdir -p /workspace/ComfyUI/models/insightface && \
-    wget -O /workspace/ComfyUI/models/insightface/inswapper_128.onnx \
+    mkdir -p /opt/ComfyUI/models/insightface && \
+    wget -O /opt/ComfyUI/models/insightface/inswapper_128.onnx \
     https://huggingface.co/datasets/Gourieff/ReActor/resolve/main/models/inswapper_128.onnx || echo '⚠️ ONNX 다운로드 실패' && \
     \
     echo '📦 파이썬 패키지 설치' && \
@@ -113,14 +113,13 @@ RUN echo '📁 커스텀 노드 및 의존성 설치 시작' && \
 
 
 # A1 폴더 생성 후 자동 커스텀 노드 설치 스크립트 복사
-RUN mkdir -p /workspace/A1
-COPY init_or_check_nodes.sh /workspace/A1/init_or_check_nodes.sh
-RUN chmod +x /workspace/A1/init_or_check_nodes.sh
+RUN mkdir -p /opt/A1
+COPY init_or_check_nodes.sh /opt/A1/init_or_check_nodes.sh
+RUN chmod +x /opt/A1/init_or_check_nodes.sh
 
 # Wan2.1_Vace_a1.sh 스크립트 복사 및 실행 권한 설정
-COPY Wan2.1_Vace_a1.sh /workspace/A1/Wan2.1_Vace_a1.sh
-RUN chmod +x /workspace/A1/Wan2.1_Vace_a1.sh
-
+COPY Wan2.1_Vace_a1.sh /opt/A1/Wan2.1_Vace_a1.sh
+RUN chmod +x /opt/A1/Wan2.1_Vace_a1.sh
 
 
 # 볼륨 마운트
@@ -136,7 +135,7 @@ echo '🌀 A1(AI는 에이원) : https://www.youtube.com/@A01demort' && \
 jupyter lab --ip=0.0.0.0 --port=8888 --allow-root \
 --ServerApp.root_dir=/workspace \
 --ServerApp.token='' --ServerApp.password='' & \
-python -u /workspace/ComfyUI/main.py --listen 0.0.0.0 --port=8188 \
+python -u /opt/ComfyUI/main.py --listen 0.0.0.0 --port=8188 \
 --front-end-version Comfy-Org/ComfyUI_frontend@latest & \
-/workspace/A1/init_or_check_nodes.sh && \
+/opt/A1/init_or_check_nodes.sh && \
 wait"
