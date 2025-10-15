@@ -26,7 +26,7 @@ RUN wget https://www.python.org/ftp/python/3.10.6/Python-3.10.6.tgz && \
     ln -sf /usr/local/bin/pip3.10 /usr/local/bin/pip && \
     cd / && rm -rf /tmp/*
 
-# ComfyUI 설치
+# ComfyUI 설치 (원래대로 /opt 경로에 빌드)
 WORKDIR /workspace
 RUN mkdir -p /workspace && chmod -R 777 /workspace && \
     chown -R root:root /workspace
@@ -46,7 +46,7 @@ RUN apt-get remove -y nodejs npm && \
 # JupyterLab 안정 버전 설치
 RUN pip install --force-reinstall jupyterlab==3.6.6 jupyter-server==1.23.6
 
-# Jupyter 설정파일 보완
+# Jupyter 설정파일 보완 (원래 위치에 복원)
 RUN mkdir -p /root/.jupyter && \
     echo "c.NotebookApp.allow_origin = '*'\n\
 c.NotebookApp.ip = '0.0.0.0'\n\
@@ -122,15 +122,21 @@ EXPOSE 8888
 # 실행 명령어 (심볼릭 링크 + 권한 정리 후 Jupyter/ComfyUI 시작)
 # ★ 수정: /workspace에 ComfyUI/A1가 항상 보이도록 링크 & 권한 추가
 CMD bash -c "\
-ln -sf /opt/ComfyUI /workspace/ComfyUI && \
-ln -sf /opt/A1       /workspace/A1 && \
+if [ ! -d \"/workspace/ComfyUI\" ]; then \
+    echo '최초 실행: /opt/ComfyUI를 /workspace/ComfyUI로 복사합니다...'; \
+    cp -r /opt/ComfyUI /workspace/; \
+fi && \
+if [ ! -d \"/workspace/A1\" ]; then \
+    echo '최초 실행: /opt/A1을 /workspace/A1로 복사합니다...'; \
+    cp -r /opt/A1 /workspace/; \
+fi && \
 chmod o+rx /workspace /opt /opt/A1 /opt/ComfyUI 2>/dev/null || true && \
 chmod -R o+rX /opt/A1 /opt/ComfyUI 2>/dev/null || true && \
 echo '🌀 A1(AI는 에이원) : https://www.youtube.com/@A01demort' && \
 jupyter lab --ip=0.0.0.0 --port=8888 --allow-root \
   --ServerApp.root_dir=/workspace \
   --ServerApp.token='' --ServerApp.password='' & \
-python -u /opt/ComfyUI/main.py --listen 0.0.0.0 --port=8188 \
+python -u /workspace/ComfyUI/main.py --listen 0.0.0.0 --port=8188 \
   --front-end-version Comfy-Org/ComfyUI_frontend@latest & \
-/opt/A1/init_or_check_nodes.sh && \
-wait"
+/workspace/A1/init_or_check_nodes.sh && \
+wait"```
