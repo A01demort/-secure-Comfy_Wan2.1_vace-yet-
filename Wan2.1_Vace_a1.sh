@@ -54,7 +54,7 @@ else
 fi
 
 # ====================================
-# 📌 다운로드 리스트 (6개 파일)
+# 📌 다운로드 리스트 (4개 파일)
 # ====================================
 downloads=(
 
@@ -88,7 +88,7 @@ rm -f "$INPUT_FILE" "$LOG_FILE" "$RESULT_FILE"
 # ====================================
 for item in "${downloads[@]}"; do
   IFS="|" read -r url path <<< "$item"
-  if [ -s "$path" ]; then  # (PATCH) 존재 + 0바이트 아님
+  if [ -f "$path" ]; then
     echo "[완료] 이미 존재: $path" | tee -a "$RESULT_FILE"
   else
     mkdir -p "$(dirname "$path")"
@@ -103,8 +103,7 @@ done
 # ====================================
 if [ -s "$INPUT_FILE" ]; then
   echo -e "\n🚀 다운로드 시작...\n"
-  aria2c --file-allocation=none \
-         -x 8 -j "$MAX_PARALLEL" -i "$INPUT_FILE" \
+  aria2c -x 8 -j "$MAX_PARALLEL" -i "$INPUT_FILE" \
          --console-log-level=notice --summary-interval=1 \
          --header="Authorization: Bearer $HUGGINGFACE_TOKEN" \
          | tee -a "$LOG_FILE"
@@ -121,7 +120,7 @@ failures=()
 
 for item in "${downloads[@]}"; do
   IFS="|" read -r url path <<< "$item"
-  if [ -s "$path" ]; then  # (PATCH) 존재 + 0바이트 아님
+  if [ -f "$path" ]; then
     echo "[완료] $path" | tee -a "$RESULT_FILE"
     ((success++))
   else
