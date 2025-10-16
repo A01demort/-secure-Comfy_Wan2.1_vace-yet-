@@ -121,19 +121,20 @@ EXPOSE 8888
 
 # 실행 명령어 (데이터 폴더는 workspace에, 나머지는 링크)
 # ★ 수정: 원래 주석을 유지하고 필요한 코드만 수정했습니다.
-CMD bash-c "\
+CMD ["bash", "-c", "\
 mkdir -p /workspace/ComfyUI/models /workspace/ComfyUI/input /workspace/ComfyUI/output /workspace/ComfyUI/custom_nodes && \
 ln -s /opt/ComfyUI/* /workspace/ComfyUI/ 2>/dev/null || true && \
 ln -sf /opt/A1 /workspace/A1 && \
 chmod -R o+rwx /workspace 2>/dev/null || true && \
-echo 'comfyui:\n extra_model_paths_config:\n - base_path: /workspace/ComfyUI' > /opt/ComfyUI/extra_model_paths.yaml && \
+echo 'comfyui:\\n  extra_model_paths_config:\\n    - base_path: /workspace/ComfyUI' > /opt/ComfyUI/extra_model_paths.yaml && \
 echo '🌀 A1(AI는 에이원) : https://www.youtube.com/@A01demort' && \
 jupyter lab --ip=0.0.0.0 --port=8888 --allow-root \
- --ServerApp.root_dir=/workspace \
- --ServerApp.token='' --ServerApp.password='' & \
+  --ServerApp.root_dir=/workspace \
+  --ServerApp.token='' --ServerApp.password='' & \
 python -u /opt/ComfyUI/main.py --listen 0.0.0.0 --port=8188 \
- --output-directory /workspace/ComfyUI/output \
- --input-directory /workspace/ComfyUI/input \
- --front-end-version Comfy-Org/ComfyUI_frontend@latest & \
+  --output-directory /workspace/ComfyUI/output \
+  --input-directory /workspace/ComfyUI/input \
+  --front-end-version Comfy-Org/ComfyUI_frontend@latest & \
 /opt/A1/init_or_check_nodes.sh && \
-wait"
+wait\
+"]
