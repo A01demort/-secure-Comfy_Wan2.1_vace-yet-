@@ -30,8 +30,8 @@ RUN wget https://www.python.org/ftp/python/3.10.6/Python-3.10.6.tgz && \
 WORKDIR /workspace
 RUN mkdir -p /workspace && chmod -R 777 /workspace && \
     chown -R root:root /workspace
-RUN git clone https://github.com/comfyanonymous/ComfyUI.git /opt/ComfyUI
-WORKDIR /opt/ComfyUI
+RUN git clone https://github.com/comfyanonymous/ComfyUI.git /workspace/ComfyUI
+WORKDIR /workspace/ComfyUI
 
 # 의존성 설치
 RUN pip install -r requirements.txt && \
@@ -56,10 +56,11 @@ c.NotebookApp.password = ''\n\
 c.NotebookApp.terminado_settings = {'shell_command': ['/bin/bash']}" \
 > /root/.jupyter/jupyter_notebook_config.py
 
+
 # 커스텀 노드 및 의존성 설치 통합
 RUN echo '📁 커스텀 노드 및 의존성 설치 시작' && \
-    mkdir -p /opt/ComfyUI/custom_nodes && \
-    cd /opt/ComfyUI/custom_nodes && \
+    mkdir -p /workspace/ComfyUI/custom_nodes && \
+    cd /workspace/ComfyUI/custom_nodes && \
     git clone https://github.com/ltdrdata/ComfyUI-Manager.git || echo '⚠️ Manager 실패' && \
     git clone https://github.com/pythongosssss/ComfyUI-Custom-Scripts.git || echo '⚠️ Scripts 실패' && \
     git clone https://github.com/rgthree/rgthree-comfy.git || echo '⚠️ rgthree 실패' && \
@@ -69,6 +70,9 @@ RUN echo '📁 커스텀 노드 및 의존성 설치 시작' && \
     git clone https://github.com/city96/ComfyUI-GGUF.git || echo '⚠️ GGUF 실패' && \
     git clone https://github.com/welltop-cn/ComfyUI-TeaCache.git || echo '⚠️ TeaCache 실패' && \
     git clone https://github.com/kaibioinfo/ComfyUI_AdvancedRefluxControl.git || echo '⚠️ ARC 실패' && \
+    git clone https://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes.git || echo '⚠️ Comfyroll 실패' && \
+    git clone https://github.com/cubiq/PuLID_ComfyUI.git || echo '⚠️ PuLID 실패' && \
+    git clone https://github.com/sipie800/ComfyUI-PuLID-Flux-Enhanced.git || echo '⚠️ Flux 실패' && \
     git clone https://github.com/Gourieff/ComfyUI-ReActor.git || echo '⚠️ ReActor 실패' && \
     git clone https://github.com/yolain/ComfyUI-Easy-Use.git || echo '⚠️ EasyUse 실패' && \
     git clone https://github.com/PowerHouseMan/ComfyUI-AdvancedLivePortrait.git || echo '⚠️ LivePortrait 실패' && \
@@ -77,18 +81,22 @@ RUN echo '📁 커스텀 노드 및 의존성 설치 시작' && \
     git clone https://github.com/ssitu/ComfyUI_UltimateSDUpscale.git || echo '⚠️ Upscale 실패' && \
     git clone https://github.com/risunobushi/comfyUI_FrequencySeparation_RGB-HSV.git || echo '⚠️ Frequency 실패' && \
     git clone https://github.com/silveroxides/ComfyUI_bnb_nf4_fp4_Loaders.git || echo '⚠️ NF4 노드 실패' && \
-    git clone https://github.com/kijai/ComfyUI-FramePackWrapper.git || echo '⚠️ FramePackWrapper 실패' && \
+    git clone https://github.com/kijai/ComfyUI-FramePackWrapper.git || echo '⚠️ FramePackWrapper 실패' && \ 
     git clone https://github.com/pollockjj/ComfyUI-MultiGPU.git || echo '⚠️ MultiGPU 실패' && \
     git clone https://github.com/Fannovel16/comfyui_controlnet_aux.git || echo '⚠️ controlnet_aux 실패' && \
     git clone https://github.com/chflame163/ComfyUI_LayerStyle.git || echo '⚠️ ComfyUI_LayerStyle 설치 실패' && \
     git clone https://github.com/kijai/ComfyUI-WanVideoWrapper.git && cd ComfyUI-WanVideoWrapper && git fetch origin 6eddec54a69d9fac30b0125a3c06656e7c533eca && git checkout 6eddec54a69d9fac30b0125a3c06656e7c533eca || echo '⚠️ ComfyUI-WanVideoWrapper 설치 실패' && \
+
+    \
     echo '📦 segment-anything 설치' && \
-    git clone https://github.com/facebookresearch/segment-anything.git /opt/segment-anything || echo '⚠️ segment-anything 실패' && \
-    pip install -e /opt/segment-anything || echo '⚠️ segment-anything pip 설치 실패' && \
+    git clone https://github.com/facebookresearch/segment-anything.git /workspace/segment-anything || echo '⚠️ segment-anything 실패' && \
+    pip install -e /workspace/segment-anything || echo '⚠️ segment-anything pip 설치 실패' && \
+    \
     echo '📦 ReActor ONNX 모델 설치' && \
-    mkdir -p /opt/ComfyUI/models/insightface && \
-    wget -O /opt/ComfyUI/models/insightface/inswapper_128.onnx \
+    mkdir -p /workspace/ComfyUI/models/insightface && \
+    wget -O /workspace/ComfyUI/models/insightface/inswapper_128.onnx \
     https://huggingface.co/datasets/Gourieff/ReActor/resolve/main/models/inswapper_128.onnx || echo '⚠️ ONNX 다운로드 실패' && \
+    \
     echo '📦 파이썬 패키지 설치' && \
     pip install --no-cache-dir \
         GitPython onnx onnxruntime opencv-python-headless tqdm requests \
@@ -103,14 +111,17 @@ RUN echo '📁 커스텀 노드 및 의존성 설치 시작' && \
     pip install bitsandbytes xformers || echo '⚠️ bitsandbytes 또는 xformers 설치 실패' && \
     pip install sageattention || echo '⚠️ sageattention 설치 실패'
 
+
 # A1 폴더 생성 후 자동 커스텀 노드 설치 스크립트 복사
-RUN mkdir -p /opt/A1
-COPY init_or_check_nodes.sh /opt/A1/init_or_check_nodes.sh
-RUN chmod +x /opt/A1/init_or_check_nodes.sh
+RUN mkdir -p /workspace/A1
+COPY init_or_check_nodes.sh /workspace/A1/init_or_check_nodes.sh
+RUN chmod +x /workspace/A1/init_or_check_nodes.sh
 
 # Wan2.1_Vace_a1.sh 스크립트 복사 및 실행 권한 설정
-COPY Wan2.1_Vace_a1.sh /opt/A1/Wan2.1_Vace_a1.sh
-RUN chmod +x /opt/A1/Wan2.1_Vace_a1.sh
+COPY Wan2.1_Vace_a1.sh /workspace/A1/Wan2.1_Vace_a1.sh
+RUN chmod +x /workspace/A1/Wan2.1_Vace_a1.sh
+
+
 
 # 볼륨 마운트
 VOLUME ["/workspace"]
@@ -119,20 +130,13 @@ VOLUME ["/workspace"]
 EXPOSE 8188
 EXPOSE 8888
 
-# 실행 명령어 (최종 수정: 앱 자체를 workspace로 복사 후 실행)
-# ★ 수정: 모든 복잡한 링크를 제거하고, 최초 실행 시 /workspace에 ComfyUI를 통째로 복사하는 가장 확실한 방식으로 변경
-CMD ["bash", "-c", "\
-if [ ! -f \"/workspace/ComfyUI/main.py\" ]; then \
-    echo \"/workspace/ComfyUI not found, copying from /opt...\" && \
-    cp -r /opt/ComfyUI /workspace/; \
-fi && \
-ln -sf /opt/A1 /workspace/A1 && \
+# 실행 명령어
+CMD bash -c "\
 echo '🌀 A1(AI는 에이원) : https://www.youtube.com/@A01demort' && \
 jupyter lab --ip=0.0.0.0 --port=8888 --allow-root \
-  --ServerApp.root_dir=/workspace \
-  --ServerApp.token='' --ServerApp.password='' & \
+--ServerApp.root_dir=/workspace \
+--ServerApp.token='' --ServerApp.password='' & \
 python -u /workspace/ComfyUI/main.py --listen 0.0.0.0 --port=8188 \
-  --front-end-version Comfy-Org/ComfyUI_frontend@latest & \
-/opt/A1/init_or_check_nodes.sh && \
-wait\
-"]
+--front-end-version Comfy-Org/ComfyUI_frontend@latest & \
+/workspace/A1/init_or_check_nodes.sh && \
+wait"
