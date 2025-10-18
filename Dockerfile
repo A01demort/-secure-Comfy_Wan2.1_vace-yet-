@@ -88,7 +88,7 @@ RUN echo '📁 커스텀 노드 및 의존성 설치 시작' && \
     git clone https://github.com/kijai/ComfyUI-FramePackWrapper.git && cd ComfyUI-FramePackWrapper && git fetch origin a7c4b704455aee0d016143f2fc232928cc0f1d83 && git checkout a7c4b704455aee0d016143f2fc232928cc0f1d83 || echo '⚠️ FramePackWrapper 실패' && cd .. && \
     git clone https://github.com/pollockjj/ComfyUI-MultiGPU.git && cd ComfyUI-MultiGPU && git fetch origin 6e4181a7bb5e2ef147aa8e1d0845098a709306a4 && git checkout 6e4181a7bb5e2ef147aa8e1d0845098a709306a4 || echo '⚠️ MultiGPU 실패' && cd .. && \
     git clone https://github.com/Fannovel16/comfyui_controlnet_aux.git && cd comfyui_controlnet_aux && git fetch origin 59b027e088c1c8facf7258f6e392d16d204b4d27 && git checkout 59b027e088c1c8facf7258f6e392d16d204b4d27 || echo '⚠️ controlnet_aux 실패' && cd .. && \
-    git clone https://github.com/chflame163/ComfyUI_LayerStyle.git && cd ComfyUI_LayerStyle && git fetch origin 42ccdd8f75ab312285eaa77073a5cc20bdba484c && git checkout 42ccdd8f75ab312285eaa77073a5cc20bdba484c || echo '⚠️ ComfyUI_LayerStyle 설치 실패' && cd .. && \
+    git clone https://github.com/chflame163/ComfyUI_LayerStyle.git && cd ComfyUI_LayerStyle && git fetch origin 3bfe8e4 && git checkout 3bfe8e4 || echo '⚠️ ComfyUI_LayerStyle 설치 실패' && \
     git clone https://github.com/kijai/ComfyUI-WanVideoWrapper.git && cd ComfyUI-WanVideoWrapper && git fetch origin 6eddec54a69d9fac30b0125a3c06656e7c533eca && git checkout 6eddec54a69d9fac30b0125a3c06656e7c533eca || echo '⚠️ ComfyUI-WanVideoWrapper 설치 실패' && \
 
 
@@ -122,11 +122,14 @@ RUN mkdir -p /workspace/A1
 COPY init_or_check_nodes.sh /workspace/A1/init_or_check_nodes.sh
 RUN chmod +x /workspace/A1/init_or_check_nodes.sh
 
-
 # Wan2.1_Vace_a1.sh 스크립트 복사 및 실행 권한 설정
 COPY Wan2.1_Vace_a1.sh /workspace/A1/Wan2.1_Vace_a1.sh
 RUN chmod +x /workspace/A1/Wan2.1_Vace_a1.sh
 
+
+# 🔧 (추가) 시드 스냅샷: 런타임에 /workspace 비어 있으면 복구용
+RUN apt-get update && apt-get install -y rsync && apt-get clean && \
+    mkdir -p /opt/seed && rsync -a /workspace/ /opt/seed/
 
 
 # 볼륨 마운트
@@ -139,10 +142,16 @@ EXPOSE 8888
 # 실행 명령어
 CMD bash -c "\
 echo '🌀 A1(AI는 에이원) : https://www.youtube.com/@A01demort' && \
+mkdir -p /workspace && \
+if [ -z \"$(ls -A /workspace 2>/dev/null || true)\" ]; then \
+  echo '↪️ /workspace is empty — seeding from /opt/seed ...'; \
+  rsync -a /opt/seed/ /workspace/ || true; \
+  chmod -R a+rwX /workspace || true; \
+fi && \
 jupyter lab --ip=0.0.0.0 --port=8888 --allow-root \
 --ServerApp.root_dir=/workspace \
 --ServerApp.token='' --ServerApp.password='' & \
 python -u /workspace/ComfyUI/main.py --listen 0.0.0.0 --port=8188 \
 --front-end-version Comfy-Org/ComfyUI_frontend@latest & \
-/workspace/A1/init_or_check_nodes.sh && \
+([ -x /workspace/A1/init_or_check_nodes.sh ] && /workspace/A1/init_or_check_nodes.sh || echo '⚠️ init_or_check_nodes.sh not found or failed (continuing)') && \
 wait"
