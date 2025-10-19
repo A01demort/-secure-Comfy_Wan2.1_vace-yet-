@@ -143,8 +143,9 @@ EXPOSE 8888
 CMD bash -c "\
 echo '🌀 A1(AI는 에이원) : https://www.youtube.com/@A01demort' && \
 mkdir -p /workspace && \
-if [ -z \"$(ls -A /workspace 2>/dev/null || true)\" ]; then \
-  echo '↪️ /workspace is empty — seeding from /opt/seed ...'; \
+# ✅ 필수 파일 기준으로 시드 복구 (lost+found 있어도 실행)
+if [ ! -f /workspace/ComfyUI/main.py ] || [ ! -f /workspace/A1/init_or_check_nodes.sh ]; then \
+  echo '↪️ /workspace missing required files — seeding from /opt/seed ...'; \
   rsync -a /opt/seed/ /workspace/ || true; \
   chmod -R a+rwX /workspace || true; \
 fi && \
