@@ -139,20 +139,38 @@ VOLUME ["/workspace"]
 EXPOSE 8188
 EXPOSE 8888
 
-# 실행 명령어
+# 실행 명령어 (견고 버전)
 CMD bash -c "\
 echo '🌀 A1(AI는 에이원) : https://www.youtube.com/@A01demort' && \
 mkdir -p /workspace && \
-# ✅ 필수 파일 기준으로 시드 복구 (lost+found 있어도 실행)
-if [ ! -f /workspace/ComfyUI/main.py ] || [ ! -f /workspace/A1/init_or_check_nodes.sh ]; then \
-  echo '↪️ /workspace missing required files — seeding from /opt/seed ...'; \
+# 1) 시도1: 시드에서 복구 (있으면 빠름)
+if [ -d /opt/seed ]; then \
   rsync -a /opt/seed/ /workspace/ || true; \
-  chmod -R a+rwX /workspace || true; \
 fi && \
+# 2) 시드가 비어 있거나(main.py 없으면) 런타임 복구(클론) 강제
+if [ ! -f /workspace/ComfyUI/main.py ]; then \
+  echo '↪️ ComfyUI not found — cloning runtime...'; \
+  git clone https://github.com/comfyanonymous/ComfyUI.git /workspace/ComfyUI && \
+  cd /workspace/ComfyUI && \
+  git fetch origin ff57793659702d502506047445f0972b10b6b9fe && \
+  git checkout ff57793659702d502506047445f0972b10b6b9fe || echo '⚠️ checkout failed (continuing)'; \
+fi && \
+# 3) A1 init 스크립트 보장(없으면 더미라도 생성해서 에러 차단)
+if [ ! -x /workspace/A1/init_or_check_nodes.sh ]; then \
+  echo '↪️ init_or_check_nodes.sh missing — creating stub...'; \
+  mkdir -p /workspace/A1 && \
+  printf '#!/usr/bin/env bash\nexit 0\n' > /workspace/A1/init_or_check_nodes.sh && \
+  chmod +x /workspace/A1/init_or_check_nodes.sh; \
+fi && \
+# 4) 권한 정리 (주피터 업/다운로드 문제 방지)
+chmod -R a+rwX /workspace || true && \
+# 5) JupyterLab: 루트=/workspace (파일 브라우저가 곧 볼륨)
 jupyter lab --ip=0.0.0.0 --port=8888 --allow-root \
---ServerApp.root_dir=/workspace \
---ServerApp.token='' --ServerApp.password='' & \
+  --ServerApp.root_dir=/workspace \
+  --ServerApp.token='' --ServerApp.password='' & \
+# 6) ComfyUI 기동 (이 시점엔 main.py 보장)
 python -u /workspace/ComfyUI/main.py --listen 0.0.0.0 --port=8188 \
---front-end-version Comfy-Org/ComfyUI_frontend@latest & \
-([ -x /workspace/A1/init_or_check_nodes.sh ] && /workspace/A1/init_or_check_nodes.sh || echo '⚠️ init_or_check_nodes.sh not found or failed (continuing)') && \
+  --front-end-version Comfy-Org/ComfyUI_frontend@latest & \
+# 7) A1 초기화(실패해도 컨테이너 유지)
+bash /workspace/A1/init_or_check_nodes.sh || echo '⚠️ init_or_check_nodes.sh returned non-zero (continuing)'; \
 wait"
