@@ -127,6 +127,12 @@ RUN chmod +x /workspace/A1/init_or_check_nodes.sh
 COPY Wan2.1_Vace_a1.sh /workspace/A1/Wan2.1_Vace_a1.sh
 RUN chmod +x /workspace/A1/Wan2.1_Vace_a1.sh
 
+# 🔒 최종 스냅샷: 빌드 완료된 /workspace를 /opt/seed에 보관
+RUN apt-get update && apt-get install -y rsync && apt-get clean && \
+    mkdir -p /opt/seed && rsync -a --delete /workspace/ /opt/seed/ && \
+    test -f /opt/seed/ComfyUI/main.py && \
+    test -d /opt/seed/ComfyUI/custom_nodes && \
+    echo "✅ seed ready: $(ls -1 /opt/seed/ComfyUI/custom_nodes | wc -l) custom nodes"
 
 # 볼륨 마운트
 VOLUME ["/workspace"]
